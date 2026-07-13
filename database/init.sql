@@ -1,0 +1,63 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE TYPE user_role AS ENUM ('admin', 'patient', 'medecin');
+CREATE TYPE appointment_status AS ENUM ('scheduled', 'cancelled', 'completed');
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    firstname TEXT NULL,
+    lastname TEXT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT NULL,
+    date_of_birth DATE NULL,
+    role user_role NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    revoked BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+
+CREATE TABLE specialties (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE doctor_specialties (
+    doctor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    specialty_id INT REFERENCES specialties(id) ON DELETE CASCADE,
+    PRIMARY KEY (doctor_id, specialty_id)
+);
+
+CREATE TABLE doctor_schedules (
+    id SERIAL PRIMARY KEY,
+    doctor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    slot_duration INT DEFAULT 30,
+    CONSTRAINT check_times CHECK (start_time < end_time)
+);
+
+CREATE TABLE appointments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    patient_id UUID NOT NULL REFERENCES users(id),
+    doctor_id UUID NOT NULL REFERENCES users(id),
+    start_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    status appointment_status DEFAULT 'scheduled',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_appointment_times CHECK (start_at < end_at)
+);
+
+
+CREATE INDEX idx_users_search ON users(lastname, email);
+
+CREATE INDEX idx_appointments_conflict_check ON appointments(doctor_id, start_at,end_at)
