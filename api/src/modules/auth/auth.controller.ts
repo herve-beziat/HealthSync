@@ -137,7 +137,6 @@ export const register = async (c: Context) => {
   }
   try {
     const user = await authService.registerService(parsed.data);
-
     return c.json({ success: "User created" }, 201);
   } catch (error) {
     return c.json({ error: "User registration Failed" }, 401);

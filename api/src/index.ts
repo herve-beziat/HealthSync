@@ -4,6 +4,7 @@ import * as AuthController from "./modules/auth/auth.controller.js";
 import { logger } from "hono/logger";
 
 const app = new Hono();
+app.use(logger());
 app.get("/", (c) => c.text("OK"));
 
 // Auth
@@ -27,8 +28,11 @@ app.get("/auth/refresh", async (c) => {
 // Protect routes
 
 // Patient
-app.use(logger());
+
 
 export default app;
-// Start the server on port 3000
-serve({ fetch: app.fetch, port: 3000 });
+
+if (process.env.NODE_ENV !== "test") {
+  serve({ fetch: app.fetch, port: 3000 });
+}
+

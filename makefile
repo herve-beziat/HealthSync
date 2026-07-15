@@ -23,8 +23,11 @@ launch:
 remove:
 	./docker/docker.sh down -v
 
-logs:
+logs-all:
 	./docker/docker.sh logs -f
+
+logs:
+	./docker/docker.sh logs -f $(s)
 
 ps:
 	./docker/docker.sh ps
@@ -42,6 +45,12 @@ rebuild: # Reconstruire un service ex:make rebuild s=api
 
 prisma-generate:
 	@cd api && npm run prisma:generate
+
+test-all:
+	@cd api && npm run test
+
+test:
+	@cd api && npm run test $(s)
 
 # --- Help ---
 help: # Affiche les commandes disponibles
