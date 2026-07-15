@@ -23,6 +23,7 @@ describe("Patients CRUD (admin)", () => {
   const deletablePatientEmail = "deletable.patient@test.com";
   const patientWithAppointmentEmail = "patient.with.appointment@test.com";
   const otherPatientEmail = "other.patient@test.com";
+  const searchPatientEmail = "zoe.search@test.com";
 
   const allTestEmails = [
     adminUser.email,
@@ -31,6 +32,7 @@ describe("Patients CRUD (admin)", () => {
     deletablePatientEmail,
     patientWithAppointmentEmail,
     otherPatientEmail,
+    searchPatientEmail,
   ];
 
   let adminToken: string;
@@ -83,6 +85,18 @@ describe("Patients CRUD (admin)", () => {
       });
     }
 
+    // Patient dédié à la recherche (US-03) — prénom/nom distincts des autres
+    await app.request("/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...patientCredentials,
+        email: searchPatientEmail,
+        firstname: "Zoe",
+        lastname: "Rechercheatest",
+      }),
+    });
+
     targetPatientId = (await prisma.users.findUniqueOrThrow({ where: { email: patientCredentials.email } })).id;
     deletablePatientId = (await prisma.users.findUniqueOrThrow({ where: { email: deletablePatientEmail } })).id;
     patientWithAppointmentId = (await prisma.users.findUniqueOrThrow({ where: { email: patientWithAppointmentEmail } })).id;
@@ -124,6 +138,64 @@ describe("Patients CRUD (admin)", () => {
     await prisma.appointments.deleteMany({ where: { patient_id: patientWithAppointmentId } });
     await prisma.refresh_tokens.deleteMany({});
     await prisma.users.deleteMany({ where: { email: { in: allTestEmails } } });
+  });
+
+  describe("GET /patients (recherche)", () => {
+    it("should return 401 without a token", async () => {
+      const res = await app.request("/patients?name=Zoe");
+      expect(res.status).toBe(401);
+    });
+
+    it("should return 403 for a patient token", async () => {
+      const res = await app.request("/patients?name=Zoe", {
+        headers: { Authorization: `Bearer ${patientToken}` },
+      });
+      expect(res.status).toBe(403);
+    });
+
+    it("should return 400 when neither name nor email is provided", async () => {
+      const res = await app.request("/patients", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(res.status).toBe(400);
+    });
+
+    it("should find the patient by partial firstname (case-insensitive)", async () => {
+      const res = await app.request("/patients?name=zoe", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.some((p: any) => p.email === searchPatientEmail)).toBe(true);
+      expect(body.every((p: any) => !("password_hash" in p))).toBe(true);
+    });
+
+    it("should find the patient by partial lastname", async () => {
+      const res = await app.request("/patients?name=recherche", {
+        headers: { Authorization: `Bearer ${medecinToken}` },
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.some((p: any) => p.email === searchPatientEmail)).toBe(true);
+    });
+
+    it("should find the patient by partial email", async () => {
+      const res = await app.request("/patients?email=zoe.search", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.some((p: any) => p.email === searchPatientEmail)).toBe(true);
+    });
+
+    it("should return an empty array when nothing matches", async () => {
+      const res = await app.request("/patients?name=nomqui nexistepas", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual([]);
+    });
   });
 
   describe("GET /patients/:id", () => {
