@@ -19,6 +19,26 @@ services:
       - healthsync_data:/var/lib/postgresql/data
       - ../database/:/docker-entrypoint-initdb.d/:ro
   
+  database-test:
+    image: postgres:17.2-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_TEST:-healthsync_test}
+      POSTGRES_USER: ${POSTGRES_USER_TEST:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_TEST:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB_TEST:-healthsync_test}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - healthsync
+    ports:
+      - "${POSTGRES_PORT_TEST:-5434}:5432"
+    volumes:
+      - healthsync_data_test:/var/lib/postgresql/data
+      - ../database/:/docker-entrypoint-initdb.d/:ro
+
   api:
     build:
       context: ../api/
@@ -46,3 +66,4 @@ networks:
 volumes:
   healthsync_data:
   api_node_modules:
+  healthsync_data_test:

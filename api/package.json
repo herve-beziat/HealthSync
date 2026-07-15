@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "prisma:generate": "prisma generate",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test": "dotenv -e ../docker/.env.test -- vitest",
+    "test:coverage": "dotenv -e ../docker/.env.test -- vitest run --coverage",
     "test:prisma": "node prisma-test.js"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
+    "dotenv-cli": "^11.0.0",
     "hono": "^4.7.10",
     "pg": "^8.22.0",
     "zod": "^4.4.3"
