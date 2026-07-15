@@ -1,6 +1,6 @@
 import { Context } from "hono";
 import { Prisma, users } from "@prisma/client";
-import { PatientIdParamSchema, UpdatePatientSchema } from "./patients.dto.js";
+import { PatientIdParamSchema, SearchPatientsQuerySchema, UpdatePatientSchema } from "./patients.dto.js";
 import * as patientsService from "./patients.service.js";
 
 /**
@@ -10,6 +10,19 @@ import * as patientsService from "./patients.service.js";
 const toPatientResponse = (patient: users) => {
   const { password_hash, ...safePatient } = patient;
   return safePatient;
+};
+
+export const searchPatients = async (c: Context) => {
+  const parsedQuery = SearchPatientsQuerySchema.safeParse({
+    name: c.req.query("name"),
+    email: c.req.query("email"),
+  });
+  if (!parsedQuery.success) {
+    return c.json({ error: parsedQuery.error.format() }, 400);
+  }
+
+  const patients = await patientsService.searchPatients(parsedQuery.data);
+  return c.json(patients.map(toPatientResponse));
 };
 
 export const getPatient = async (c: Context) => {
