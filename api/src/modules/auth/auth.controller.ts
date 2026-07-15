@@ -4,6 +4,7 @@ import * as authService from "./auth.service.js";
 import { decode, sign, verify } from "hono/jwt";
 import { setCookie, getCookie } from "hono/cookie";
 import argon2 from "argon2";
+import { randomUUID } from "crypto";
 
 interface UserPayload {
   id: string;
@@ -25,6 +26,11 @@ const createJWT = async (user: UserPayload) => {
   const token = await sign(
     {
       ...basePayload,
+      // jti (JWT ID) unique par génération : évite que deux connexions
+      // rapprochées (même seconde) produisent un JWT strictement identique,
+      // ce qui ferait échouer l'insertion du refresh token en base
+      // (contrainte @unique sur refresh_tokens.token).
+      jti: randomUUID(),
       exp: Math.floor(Date.now() / 1000) + 15 * 60,
     },
     JWT_SECRET,
@@ -33,6 +39,7 @@ const createJWT = async (user: UserPayload) => {
   const refreshToken = await sign(
     {
       ...basePayload,
+      jti: randomUUID(),
       exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
     },
     JWT_SECRET,
