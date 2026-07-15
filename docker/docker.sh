@@ -30,7 +30,7 @@ set -a
 source docker/.env
 set +a
 
-launch_compose="docker-compose"
+launch_compose="docker compose"
 if ! command -v ${launch_compose} &> /dev/null; then
     launch_compose="docker compose"
     if ! docker compose version &> /dev/null; then
