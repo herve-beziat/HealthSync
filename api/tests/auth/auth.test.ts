@@ -13,9 +13,15 @@ describe("Auth System", () => {
     role: "patient",
   };
 
+  // Email utilisé uniquement pour le test d'élévation de privilèges ci-dessous.
+  const privilegeEscalationEmail = "hacker@test.com";
+
   beforeAll(async () => {
     await prisma.refresh_tokens.deleteMany();
     await prisma.users.deleteMany({ where: { email: testUser.email } });
+    // Nettoyage préventif : évite un conflit d'email unique si les tests
+    // sont relancés plusieurs fois sans réinitialiser la base.
+    await prisma.users.deleteMany({ where: { email: privilegeEscalationEmail } });
   });
 
   describe("POST /auth/register", () => {
@@ -57,6 +63,30 @@ describe("Auth System", () => {
         }),
       });
       expect(res.status).toBe(400);
+    });
+
+    // Test de sécurité : même si un client envoie un rôle dans le body,
+    // le compte créé doit toujours être un "patient". RegisterSchema
+    // n'accepte plus le champ "role", donc il est ignoré silencieusement.
+    it("should ignore a role field in the request body and always create a patient", async () => {
+      const res = await app.request("/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...testUser,
+          email: privilegeEscalationEmail,
+          role: "admin", // tentative d'élévation de privilèges
+        }),
+      });
+
+      expect(res.status).toBe(201);
+
+      const created = await prisma.users.findUnique({
+        where: { email: privilegeEscalationEmail },
+      });
+      expect(created?.role).toBe("patient");
     });
   });
 
