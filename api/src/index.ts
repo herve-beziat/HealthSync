@@ -34,6 +34,10 @@ app.get("/auth/refresh", async (c) => {
 // Réservé aux comptes admin et medecin — un patient ne peut pas gérer
 // d'autres comptes patients via ces routes.
 
+app.get("/patients", authMiddleware, requireRole(["admin", "medecin"]), async (c) => {
+  return PatientsController.searchPatients(c);
+});
+
 app.get("/patients/:id", authMiddleware, requireRole(["admin", "medecin"]), async (c) => {
   return PatientsController.getPatient(c);
 });

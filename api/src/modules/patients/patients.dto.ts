@@ -30,5 +30,21 @@ export const UpdatePatientSchema = z
     message: "Au moins un champ doit être renseigné pour la modification",
   });
 
+/**
+ * Schéma de validation pour GET /patients?name=&email= (US-03).
+ * Les deux paramètres sont optionnels individuellement, mais au moins
+ * l'un des deux doit être fourni — sinon on autoriserait un dump complet
+ * de tous les patients d'un simple GET /patients sans rien préciser.
+ */
+export const SearchPatientsQuerySchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    email: z.string().min(1).optional(),
+  })
+  .refine((data) => data.name || data.email, {
+    message: "Au moins un des paramètres 'name' ou 'email' doit être fourni",
+  });
+
 export type PatientIdParam = z.infer<typeof PatientIdParamSchema>;
 export type UpdatePatientInput = z.infer<typeof UpdatePatientSchema>;
+export type SearchPatientsQuery = z.infer<typeof SearchPatientsQuerySchema>;
