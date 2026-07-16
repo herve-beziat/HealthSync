@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import * as AuthController from "./modules/auth/auth.controller.js";
 import { logger } from "hono/logger";
+import { requireRole } from "./utils/role.js";
+import { USER_ROLE } from "./utils/user.js";
 
 const app = new Hono();
 app.use(logger());
@@ -29,6 +31,19 @@ app.get("/auth/refresh", async (c) => {
 
 // Patient
 
+// Specialties
+app.get("/specialties", async (c) => {
+  return c.json({ message: "Specialties route accessed" });
+});
+
+// Doctor
+app.post("/doctor", requireRole(USER_ROLE.DOCTOR), async (c) => {
+  return c.json({ message: "Doctor route accessed" });
+});
+
+app.get("/doctor", requireRole(USER_ROLE.PATIENT), async (c) => {
+  return c.json({ message: "Patient route accessed" });
+});
 
 export default app;
 
