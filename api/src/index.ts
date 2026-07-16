@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import * as AuthController from "./modules/auth/auth.controller.js";
+import * as DoctorController from "./modules/doctors/doctors.controller.js";
 import { logger } from "hono/logger";
-import { requireRole } from "./utils/role.js";
 import { USER_ROLE } from "./utils/user.js";
+import { auth } from "./middleware/auth.middleware.js";
 
 const app = new Hono();
 app.use(logger());
@@ -37,17 +38,32 @@ app.get("/specialties", async (c) => {
 });
 
 // Doctor
-app.post("/doctor", requireRole(USER_ROLE.DOCTOR), async (c) => {
-  return c.json({ message: "Doctor route accessed" });
+app.post("/doctor", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
+  return DoctorController.createDoctor(c);
 });
 
-app.get("/doctor", requireRole(USER_ROLE.PATIENT), async (c) => {
-  return c.json({ message: "Patient route accessed" });
+app.get("/doctors", auth(), async (c) => {
+  return DoctorController.getDoctors(c);
 });
+
+app.get("/doctor/:id", auth(), async (c) => {
+  return DoctorController.getDoctorById(c);
+});
+
+app.put("/doctor/:id", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
+  return DoctorController.updateDoctor(c);
+});
+
+app.delete(
+  "/doctor/:id",
+  auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]),
+  async (c) => {
+    return DoctorController.deleteDoctor(c);
+  },
+);
 
 export default app;
 
 if (process.env.NODE_ENV !== "test") {
   serve({ fetch: app.fetch, port: 3000 });
 }
-
