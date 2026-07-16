@@ -1,19 +1,20 @@
 import { doctor_schedules } from "@prisma/client";
 import { prisma } from "../../utils/prisma.js";
 
-
 const parseTimeToDate = (timeString: string): Date => {
-    const [hours, minutes] = timeString.split(":").map(Number);
-    const date = new Date();
-    date.setHours(hours, minutes, 0, 0);
-    return date;
+  const [hours, minutes] = timeString.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
 };
 
-export const getSchedulesByDoctorId = async (doctorId: string): Promise<doctor_schedules[]> => {
-    return await prisma.doctor_schedules.findMany({
-        where: { doctor_id: doctorId },
-        orderBy: { day_of_week: "asc" },
-    });
+export const getSchedulesByDoctorId = async (
+  doctorId: string,
+): Promise<doctor_schedules[]> => {
+  return await prisma.doctor_schedules.findMany({
+    where: { doctor_id: doctorId },
+    orderBy: { day_of_week: "asc" },
+  });
 };
 
 export const createSchedule = async (data: {
@@ -23,8 +24,19 @@ export const createSchedule = async (data: {
     end_time: string;
     slot_duration?: number;
 }): Promise<doctor_schedules> => {
-    return await prisma.doctor_schedules.create({
-        data: {
+    return await prisma.doctor_schedules.upsert({
+        where: {
+            doctor_id_day_of_week: {
+                doctor_id: data.doctor_id,
+                day_of_week: data.day_of_week,
+            }
+        },
+        update: {
+            start_time: parseTimeToDate(data.start_time),
+            end_time: parseTimeToDate(data.end_time),
+            slot_duration: data.slot_duration ?? 30,
+        },
+        create: {
             doctor_id: data.doctor_id,
             day_of_week: data.day_of_week,
             start_time: parseTimeToDate(data.start_time),
@@ -35,7 +47,7 @@ export const createSchedule = async (data: {
 };
 
 export const deleteSchedule = async (id: number): Promise<doctor_schedules> => {
-    return await prisma.doctor_schedules.delete({
-        where: { id },
-    });
+  return await prisma.doctor_schedules.delete({
+    where: { id },
+  });
 };
