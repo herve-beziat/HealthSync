@@ -31,6 +31,8 @@ model doctor_schedules {
   end_time      DateTime @db.Time(6)
   slot_duration Int?     @default(30)
   users         users    @relation(fields: [doctor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  
+  @@unique([doctor_id, day_of_week])
 }
 
 model doctor_specialties {

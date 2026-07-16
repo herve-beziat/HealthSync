@@ -87,6 +87,13 @@ clean: # Nettoie Docker en supprimant les images, conteneurs et réseaux inutili
 prisma-generate: # Génère le client Prisma localement
 	@cd api && npm run prisma:generate
 
+
+prisma-migrate: # Applique les migrations Prisma à la base de données
+	@cd api && npm run prisma:migrate
+
+prisma-push: # Applique les migrations Prisma à la base de données et génère le client
+	@cd api && npx prisma db push
+
 test-all: # Lance l'intégralité de la suite de tests
 	@cd api && npm run test
 
