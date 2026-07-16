@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import * as AuthController from "./modules/auth/auth.controller.js";
 import * as DoctorController from "./modules/doctors/doctors.controller.js";
+import * as PatientsController from "./modules/patients/patients.controller.js";
+import * as SpecialtyController from "./modules/specialties/specialties.controller.js";
 import { logger } from "hono/logger";
 import { USER_ROLE } from "./utils/user.js";
 import { auth } from "./middleware/auth.middleware.js";
@@ -31,13 +33,29 @@ app.get("/auth/refresh", async (c) => {
 // Protect routes
 
 // Patient
+// Réservé aux comptes admin et medecin — un patient ne peut pas gérer
+// d'autres comptes patients via ces routes.
 
-// Specialties
-app.get("/specialties", async (c) => {
-  return c.json({ message: "Specialties route accessed" });
+app.get("/patients", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
+  return PatientsController.searchPatients(c);
+});
+
+app.get("/patients/:id", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
+  return PatientsController.getPatient(c);
+});
+
+app.patch("/patients/:id", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
+  return PatientsController.updatePatient(c);
+});
+
+app.delete("/patients/:id", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
+  return PatientsController.deletePatient(c);
 });
 
 // Doctor
+// Réservé aux comptes admin et medecin — un medecin ne peut pas gérer
+// d'autres comptes medecins via ces routes.
+
 app.post("/doctor", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
   return DoctorController.createDoctor(c);
 });
@@ -61,6 +79,27 @@ app.delete(
     return DoctorController.deleteDoctor(c);
   },
 );
+
+// Specialties
+app.get("/specialties", auth(), async (c) => {
+  return SpecialtyController.getSpecialties(c);
+});
+
+app.get("/specialty/:id", auth(), async (c) => {
+  return SpecialtyController.getSpecialtyById(c);
+});
+
+app.post("/specialty", auth([USER_ROLE.ADMIN]), async (c) => {
+  return SpecialtyController.createSpecialty(c);
+});
+
+app.put("/specialty/:id", auth([USER_ROLE.ADMIN]), async (c) => {
+  return SpecialtyController.updateSpecialty(c);
+});
+
+app.delete("/specialty/:id", auth([USER_ROLE.ADMIN]), async (c) => {
+  return SpecialtyController.deleteSpecialty(c);
+});
 
 export default app;
 
