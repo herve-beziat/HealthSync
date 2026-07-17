@@ -8,9 +8,7 @@ const parseTimeToDate = (timeString: string): Date => {
   return date;
 };
 
-export const getSchedulesByDoctorId = async (
-  doctorId: string,
-): Promise<doctor_schedules[]> => {
+export const getSchedulesByDoctorId = async (doctorId: string): Promise<doctor_schedules[]> => {
   return await prisma.doctor_schedules.findMany({
     where: { doctor_id: doctorId },
     orderBy: { day_of_week: "asc" },

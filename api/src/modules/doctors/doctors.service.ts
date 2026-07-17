@@ -40,9 +40,7 @@ export const getDoctorById = async (doctorId: string, secure: boolean) => {
   });
 };
 
-export const getDoctorBySpecialty = async (
-  specialtyId: number,
-): Promise<any[] | null> => {
+export const getDoctorBySpecialty = async (specialtyId: number): Promise<any[] | null> => {
   return await prisma.users.findMany({
     where: {
       role: USER_ROLE.DOCTOR as any,
@@ -80,10 +78,7 @@ export const createDoctor = async (data: DoctorInput): Promise<users> => {
   });
 };
 
-export const updateDoctor = async (
-  doctorId: string,
-  data: UpdateDoctorInput,
-): Promise<users> => {
+export const updateDoctor = async (doctorId: string, data: UpdateDoctorInput): Promise<users> => {
   const hashed = data.password ? await argon2.hash(data.password) : undefined;
   return await prisma.users.update({
     where: { id: doctorId },
@@ -91,9 +86,7 @@ export const updateDoctor = async (
       email: data.email,
       firstname: data.firstname,
       lastname: data.lastname,
-      date_of_birth: data.date_of_birth
-        ? new Date(data.date_of_birth)
-        : undefined,
+      date_of_birth: data.date_of_birth ? new Date(data.date_of_birth) : undefined,
       phone: data.phone,
       password_hash: hashed,
     },

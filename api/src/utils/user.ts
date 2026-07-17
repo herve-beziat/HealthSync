@@ -1,7 +1,7 @@
 export enum USER_ROLE {
-  "PATIENT" = "patient",
-  "DOCTOR" = "medecin",
-  "ADMIN" = "admin",
+  PATIENT = "patient",
+  DOCTOR = "medecin",
+  ADMIN = "admin",
 }
 
 export const USER_AVAILABLES_ROLES = [

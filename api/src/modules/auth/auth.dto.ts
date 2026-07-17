@@ -15,7 +15,7 @@ export const RegisterSchema = z.object({
   lastname: z.string(),
   phone: z.string(),
   date_of_birth: z.coerce.date({
-    error: () => ({ message: "Format de date invalide (attendu: YYYY-MM-DD)" })
+    error: () => ({ message: "Format de date invalide (attendu: YYYY-MM-DD)" }),
   }),
 });
 
@@ -35,5 +35,5 @@ export type LoginInput = z.infer<typeof LoginSchema>;
 // Type pour le refresh token, non géré par Zod (pas de body à valider ici,
 // le token vient d'un cookie httpOnly).
 export type RefreshTokenInput = {
-  token: string
+  token: string;
 };

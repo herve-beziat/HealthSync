@@ -26,15 +26,10 @@ type JwtPayload = {
 export const auth = (allowedRoles?: string | string[]) =>
   createMiddleware(async (c, next) => {
     const authHeader = c.req.header("Authorization");
-    if (!authHeader?.startsWith("Bearer "))
-      return c.json({ message: "Missing Token" }, 401);
+    if (!authHeader?.startsWith("Bearer ")) return c.json({ message: "Missing Token" }, 401);
     const token = authHeader.slice(7);
     try {
-      const payload = (await verify(
-        token,
-        process.env.JWT_SECRET!,
-        "HS256",
-      )) as JwtPayload;
+      const payload = (await verify(token, process.env.JWT_SECRET!, "HS256")) as JwtPayload;
 
       if (allowedRoles) {
         if (Array.isArray(allowedRoles)) {

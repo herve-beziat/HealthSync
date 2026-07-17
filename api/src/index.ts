@@ -4,7 +4,7 @@ import * as AuthController from "./modules/auth/auth.controller.js";
 import * as DoctorController from "./modules/doctors/doctors.controller.js";
 import * as PatientsController from "./modules/patients/patients.controller.js";
 import * as SpecialtyController from "./modules/specialties/specialties.controller.js";
-import * as DoctorScheduleController from "./modules/doctors_schedules/doctor_schedules.controller.js"
+import * as DoctorScheduleController from "./modules/doctors_schedules/doctor_schedules.controller.js";
 import { logger } from "hono/logger";
 import { USER_ROLE } from "./utils/user.js";
 import { auth } from "./middleware/auth.middleware.js";
@@ -73,13 +73,9 @@ app.put("/doctor/:id", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
   return DoctorController.updateDoctor(c);
 });
 
-app.delete(
-  "/doctor/:id",
-  auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]),
-  async (c) => {
-    return DoctorController.deleteDoctor(c);
-  },
-);
+app.delete("/doctor/:id", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) => {
+  return DoctorController.deleteDoctor(c);
+});
 
 // Specialties
 app.get("/specialties", auth(), async (c) => {
