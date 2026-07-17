@@ -7,7 +7,7 @@ export const getSpecialties = async (c: Context) => {
   try {
     const specialties = await specialtyService.getSpecialties();
     return c.json({ specialties: specialties }, 200);
-  } catch (error) {
+  } catch {
     return c.json({ error: "Retrieving data failed" }, 500);
   }
 };
@@ -20,7 +20,7 @@ export const getSpecialtyById = async (c: Context) => {
       return c.json({ error: "Specialty not found" }, 404);
     }
     return c.json({ specialty: specialty }, 200);
-  } catch (error) {
+  } catch {
     return c.json({ error: "Retrieving data failed" }, 500);
   }
 };
@@ -46,7 +46,7 @@ export const createSpecialty = async (c: Context) => {
 
 export const updateSpecialty = async (c: Context) => {
   const specialtyId = parseInt(c.req.param("id")!);
-  
+
   if (isNaN(specialtyId)) {
     return c.json({ error: "Invalid specialty ID" }, 400);
   }
@@ -63,11 +63,8 @@ export const updateSpecialty = async (c: Context) => {
       return c.json({ error: "No fields to update" }, 400);
     }
 
-    const specialty = await specialtyService.updateSpecialty(
-      specialtyId,
-      parsed.data.name,
-    );
-    
+    const specialty = await specialtyService.updateSpecialty(specialtyId, parsed.data.name);
+
     return c.json({ specialty: specialty }, 200);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -91,10 +88,7 @@ export const deleteSpecialty = async (c: Context) => {
     const specialty = await specialtyService.deleteSpecialty(specialtyId);
     return c.json({ specialty: specialty }, 200);
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
       return c.json({ error: "Specialty not found" }, 404);
     }
     return c.json({ error: "Deleting specialty failed" }, 500);

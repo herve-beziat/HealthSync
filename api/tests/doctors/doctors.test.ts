@@ -8,7 +8,7 @@ describe("Doctor CRUD Endpoints", () => {
   let adminToken: string;
   let doctorToken: string;
   let patientToken: string;
-  
+
   let createdDoctorId: string;
   const targetDoctorId = "550e8400-e29b-41d4-a716-446655440000";
   const testDoctorEmail = "target.doctor@test.com";
@@ -23,9 +23,9 @@ describe("Doctor CRUD Endpoints", () => {
         OR: [
           { id: targetDoctorId },
           { email: testDoctorEmail },
-          { email: "new.doctor@example.com" }
-        ]
-      }
+          { email: "new.doctor@example.com" },
+        ],
+      },
     });
 
     await prisma.users.create({
@@ -38,7 +38,7 @@ describe("Doctor CRUD Endpoints", () => {
         date_of_birth: new Date("1980-01-01"),
         password_hash: "dummy_hash",
         role: USER_ROLE.DOCTOR as any,
-      }
+      },
     });
 
     // 3. Génération des tokens JWT
@@ -51,11 +51,8 @@ describe("Doctor CRUD Endpoints", () => {
     // Nettoyage après tous les tests
     await prisma.users.deleteMany({
       where: {
-        OR: [
-          { id: targetDoctorId },
-          { email: "new.doctor@example.com" }
-        ]
-      }
+        OR: [{ id: targetDoctorId }, { email: "new.doctor@example.com" }],
+      },
     });
   });
 
@@ -65,7 +62,7 @@ describe("Doctor CRUD Endpoints", () => {
       const res = await app.request("/doctor", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${adminToken}`,
+          Authorization: `Bearer ${adminToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -82,7 +79,7 @@ describe("Doctor CRUD Endpoints", () => {
       const body = await res.json();
       expect(body.doctor).toHaveProperty("id");
       expect(body.doctor.email).toBe("new.doctor@example.com");
-      
+
       createdDoctorId = body.doctor.id; // Stocké pour le test de suppression à la fin
     });
 
@@ -90,7 +87,7 @@ describe("Doctor CRUD Endpoints", () => {
       const res = await app.request("/doctor", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${adminToken}`,
+          Authorization: `Bearer ${adminToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -110,7 +107,7 @@ describe("Doctor CRUD Endpoints", () => {
     it("should allow any authenticated user to fetch the doctors list", async () => {
       const res = await app.request("/doctors", {
         method: "GET",
-        headers: { "Authorization": `Bearer ${patientToken}` },
+        headers: { Authorization: `Bearer ${patientToken}` },
       });
 
       expect(res.status).toBe(200);
@@ -126,7 +123,7 @@ describe("Doctor CRUD Endpoints", () => {
     it("should return the profile without sensitive data for a patient (secure mode)", async () => {
       const res = await app.request(`/doctor/${targetDoctorId}`, {
         method: "GET",
-        headers: { "Authorization": `Bearer ${patientToken}` },
+        headers: { Authorization: `Bearer ${patientToken}` },
       });
 
       expect(res.status).toBe(200);
@@ -139,7 +136,7 @@ describe("Doctor CRUD Endpoints", () => {
     it("should return full details if requested by the doctor themselves", async () => {
       const res = await app.request(`/doctor/${targetDoctorId}`, {
         method: "GET",
-        headers: { "Authorization": `Bearer ${doctorToken}` },
+        headers: { Authorization: `Bearer ${doctorToken}` },
       });
 
       expect(res.status).toBe(200);
@@ -150,7 +147,7 @@ describe("Doctor CRUD Endpoints", () => {
     it("should return 404 if the doctor does not exist", async () => {
       const res = await app.request("/doctor/00000000-0000-0000-0000-000000000000", {
         method: "GET",
-        headers: { "Authorization": `Bearer ${adminToken}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(res.status).toBe(404);
@@ -163,7 +160,7 @@ describe("Doctor CRUD Endpoints", () => {
       const res = await app.request(`/doctor/${targetDoctorId}`, {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${doctorToken}`,
+          Authorization: `Bearer ${doctorToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -180,7 +177,7 @@ describe("Doctor CRUD Endpoints", () => {
       const res = await app.request(`/doctor/${createdDoctorId}`, {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${doctorToken}`, // C'est l'ID de targetDoctorId
+          Authorization: `Bearer ${doctorToken}`, // C'est l'ID de targetDoctorId
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ firstname: "Hacker" }),
@@ -193,7 +190,7 @@ describe("Doctor CRUD Endpoints", () => {
       const res = await app.request("/doctor/00000000-0000-0000-0000-000000000000", {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${adminToken}`,
+          Authorization: `Bearer ${adminToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ firstname: "Ghost" }),
@@ -208,7 +205,7 @@ describe("Doctor CRUD Endpoints", () => {
     it("should forbid a patient from deleting a doctor", async () => {
       const res = await app.request(`/doctor/${createdDoctorId}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${patientToken}` },
+        headers: { Authorization: `Bearer ${patientToken}` },
       });
 
       expect(res.status).toBe(403);
@@ -217,7 +214,7 @@ describe("Doctor CRUD Endpoints", () => {
     it("should allow an admin to delete a doctor", async () => {
       const res = await app.request(`/doctor/${createdDoctorId}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${adminToken}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(res.status).toBe(200);
@@ -228,7 +225,7 @@ describe("Doctor CRUD Endpoints", () => {
     it("should return 404 if trying to delete an already deleted doctor", async () => {
       const res = await app.request(`/doctor/${createdDoctorId}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${adminToken}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(res.status).toBe(404);

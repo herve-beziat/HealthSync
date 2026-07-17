@@ -14,20 +14,14 @@ describe("Specialties CRUD Endpoints", () => {
   let patientToken: string;
 
   let createdSpecialtyId: number;
-  let staticTestSpecialtyId: number; 
+  let staticTestSpecialtyId: number;
 
   beforeAll(async () => {
     const secret = process.env.JWT_SECRET || "supersecretjwtkey";
     const exp = Math.floor(Date.now() / 1000) + 3600;
 
-    adminToken = await sign(
-      { userId: "admin-id", role: USER_ROLE.ADMIN, exp },
-      secret,
-    );
-    patientToken = await sign(
-      { userId: "patient-id", role: USER_ROLE.PATIENT, exp },
-      secret,
-    );
+    adminToken = await sign({ userId: "admin-id", role: USER_ROLE.ADMIN, exp }, secret);
+    patientToken = await sign({ userId: "patient-id", role: USER_ROLE.PATIENT, exp }, secret);
 
     // Création d'une spécialité de secours en BDD dédiée aux tests unitaires de modification/lecture
     const fallbackSpecialty = await prisma.specialties.create({
@@ -46,7 +40,7 @@ describe("Specialties CRUD Endpoints", () => {
           id: staticTestSpecialtyId,
         },
       });
-    } catch (e) {
+    } catch {
       // Ignorer si déjà supprimée par le test DELETE
     }
   });
@@ -155,14 +149,15 @@ describe("Specialties CRUD Endpoints", () => {
         },
         body: JSON.stringify({ name: uniqueUpdateName }),
       });
-      console.log("PUT /specialty/:id response status:", res.body ? res.status : "No response body");
+      console.log(
+        "PUT /specialty/:id response status:",
+        res.body ? res.status : "No response body",
+      );
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.specialty.name).toBe(uniqueUpdateName);
 
-      await prisma.specialties
-        .delete({ where: { id: localSpecialty.id } })
-        .catch(() => {});
+      await prisma.specialties.delete({ where: { id: localSpecialty.id } }).catch(() => {});
     });
   });
 

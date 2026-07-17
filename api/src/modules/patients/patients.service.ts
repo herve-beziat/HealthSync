@@ -47,7 +47,7 @@ export const searchPatients = async (filters: SearchPatientsQuery): Promise<user
  */
 export const updatePatient = async (
   id: string,
-  data: UpdatePatientInput
+  data: UpdatePatientInput,
 ): Promise<users | null> => {
   const existing = await prisma.users.findFirst({ where: { id, role: "patient" } });
   if (!existing) return null;
