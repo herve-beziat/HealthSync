@@ -4,6 +4,7 @@ import * as AuthController from "./modules/auth/auth.controller.js";
 import * as DoctorController from "./modules/doctors/doctors.controller.js";
 import * as PatientsController from "./modules/patients/patients.controller.js";
 import * as SpecialtyController from "./modules/specialties/specialties.controller.js";
+import * as DoctorScheduleController from "./modules/doctors_schedules/doctor_schedules.controller.js"
 import { logger } from "hono/logger";
 import { USER_ROLE } from "./utils/user.js";
 import { auth } from "./middleware/auth.middleware.js";
@@ -99,6 +100,23 @@ app.put("/specialty/:id", auth([USER_ROLE.ADMIN]), async (c) => {
 
 app.delete("/specialty/:id", auth([USER_ROLE.ADMIN]), async (c) => {
   return SpecialtyController.deleteSpecialty(c);
+});
+
+// Doctor Schedules
+app.get("/doctor/:doctorId/schedules", auth(), async (c) => {
+  return DoctorScheduleController.getSchedulesByDoctor(c);
+});
+
+app.post("/doctor-schedules", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), async (c) => {
+  return DoctorScheduleController.createSchedule(c);
+});
+
+app.put("/doctor-schedules/:id", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), async (c) => {
+  return DoctorScheduleController.updateSchedule(c);
+});
+
+app.delete("/doctor-schedules/:id", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), async (c) => {
+  return DoctorScheduleController.deleteSchedule(c);
 });
 
 export default app;
