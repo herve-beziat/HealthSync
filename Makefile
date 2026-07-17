@@ -94,12 +94,19 @@ prisma-migrate: # Applique les migrations Prisma à la base de données
 prisma-push: # Applique les migrations Prisma à la base de données et génère le client
 	@cd api && npx prisma db push
 
+# --- Tests ---
 test-all: # Lance l'intégralité de la suite de tests
 	@cd api && npm run test
 
 test: # Lance un fichier de test spécifique ou général (ex: make test s=auth)
 	@cd api && npm run test $(s)
 
+test-watch: # Lance les tests en mode watch pour un fichier spécifique ou général (ex: make test-watch s=auth)
+	@cd api && npm run test-watch $(s)
+
+test-coverage: # Lance les tests avec couverture de code et génère un rapport
+	@cd api && npm run test-coverage
+	
 # --- Aide ---
 
 help: # Affiche la liste et la description de toutes les commandes disponibles
