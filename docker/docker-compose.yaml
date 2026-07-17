@@ -59,6 +59,27 @@ services:
     networks:
       - healthsync
 
+  grpc-service:
+    build:
+      context: ../grpc-service/
+      dockerfile: Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?schema=public
+      GRPC_PORT: 50051
+    ports:
+      - "${GRPC_PORT:-50051}:50051"
+    volumes:
+      - ../grpc-service:/usr/src/app
+      - grpc_service_node_modules:/usr/src/app/node_modules
+    networks:
+      - healthsync
+
 networks:
   healthsync:
     driver: bridge
@@ -67,3 +88,4 @@ volumes:
   healthsync_data:
   api_node_modules:
   healthsync_data_test:
+  grpc_service_node_modules:
