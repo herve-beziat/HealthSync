@@ -1,6 +1,6 @@
-import { describe, expect, it, beforeAll } from "vitest";
-import app from "../../src/index.js"; // Ajuste le chemin vers ton app Hono
-
+import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import app from "../../src/index.js";
+import { prisma } from "../../src/utils/prisma.js";
 import { sign } from "hono/jwt";
 import { USER_ROLE } from "../../src/utils/user.js";
 
@@ -10,15 +10,53 @@ describe("Doctor CRUD Endpoints", () => {
   let patientToken: string;
   
   let createdDoctorId: string;
-  const targetDoctorId = "550e8400-e29b-41d4-a716-446655440000"; // ID présent dans ton SQL d'init
+  const targetDoctorId = "550e8400-e29b-41d4-a716-446655440000";
+  const testDoctorEmail = "target.doctor@test.com";
 
-  // 1. Génération de tokens mocks pour simuler le middleware d'authentification
   beforeAll(async () => {
     const secret = process.env.JWT_SECRET || "supersecretjwtkey";
-    
-    adminToken = await sign({ userId: "admin-id", role: USER_ROLE.ADMIN, exp: Math.floor(Date.now() / 1000) + 3600 }, secret);
-    doctorToken = await sign({ userId: targetDoctorId, role: USER_ROLE.DOCTOR, exp: Math.floor(Date.now() / 1000) + 3600 }, secret);
-    patientToken = await sign({ userId: "patient-id", role: USER_ROLE.PATIENT, exp: Math.floor(Date.now() / 1000) + 3600 }, secret);
+    const exp = Math.floor(Date.now() / 1000) + 3600;
+
+    // 1. Nettoyage de sécurité
+    await prisma.users.deleteMany({
+      where: {
+        OR: [
+          { id: targetDoctorId },
+          { email: testDoctorEmail },
+          { email: "new.doctor@example.com" }
+        ]
+      }
+    });
+
+    await prisma.users.create({
+      data: {
+        id: targetDoctorId,
+        firstname: "Jean",
+        lastname: "Dupont",
+        email: testDoctorEmail,
+        phone: "0612345678",
+        date_of_birth: new Date("1980-01-01"),
+        password_hash: "dummy_hash",
+        role: USER_ROLE.DOCTOR as any,
+      }
+    });
+
+    // 3. Génération des tokens JWT
+    adminToken = await sign({ userId: "admin-id", role: USER_ROLE.ADMIN, exp }, secret);
+    doctorToken = await sign({ userId: targetDoctorId, role: USER_ROLE.DOCTOR, exp }, secret);
+    patientToken = await sign({ userId: "patient-id", role: USER_ROLE.PATIENT, exp }, secret);
+  });
+
+  afterAll(async () => {
+    // Nettoyage après tous les tests
+    await prisma.users.deleteMany({
+      where: {
+        OR: [
+          { id: targetDoctorId },
+          { email: "new.doctor@example.com" }
+        ]
+      }
+    });
   });
 
   // --- POST /doctor (CREATE) ---
@@ -45,7 +83,7 @@ describe("Doctor CRUD Endpoints", () => {
       expect(body.doctor).toHaveProperty("id");
       expect(body.doctor.email).toBe("new.doctor@example.com");
       
-      createdDoctorId = body.doctor.id; // On stocke l'id créé pour les tests suivants
+      createdDoctorId = body.doctor.id; // Stocké pour le test de suppression à la fin
     });
 
     it("should reject creation if body data is invalid (Zod fail)", async () => {
