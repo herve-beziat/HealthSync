@@ -1,5 +1,5 @@
 import { refresh_tokens, users } from "@prisma/client";
-import { LoginInput, RefreshTokenInput, RegisterInput } from "./auth.dto.js";
+import { LoginInput, RegisterInput } from "./auth.dto.js";
 import * as argon2 from "argon2";
 import { prisma } from "../../utils/prisma.js";
 
@@ -39,7 +39,11 @@ export const loginService = async (data: LoginInput): Promise<users | null> => {
  * Enregistre un nouveau refresh token en base, associé à un utilisateur,
  * avec sa date d'expiration. Utilisé après un login réussi.
  */
-export const insertRefreshToken = async (data: { userId: string; token: string; expiresAt: Date }): Promise<refresh_tokens> => {
+export const insertRefreshToken = async (data: {
+  userId: string;
+  token: string;
+  expiresAt: Date;
+}): Promise<refresh_tokens> => {
   return await prisma.refresh_tokens.create({
     data: {
       user_id: data.userId,
@@ -75,12 +79,12 @@ export const revokeRefreshToken = async (token: string): Promise<refresh_tokens>
  */
 export const rotateRefreshToken = async (
   oldToken: string,
-  newData: { userId: string; token: string; expiresAt: Date }
+  newData: { userId: string; token: string; expiresAt: Date },
 ) => {
   return await prisma.$transaction(async (tx) => {
     await tx.refresh_tokens.update({
-        where: { token: oldToken },
-        data: { revoked: true }
+      where: { token: oldToken },
+      data: { revoked: true },
     });
 
     return await tx.refresh_tokens.create({

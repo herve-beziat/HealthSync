@@ -1,6 +1,10 @@
 import { Context } from "hono";
 import { Prisma, users } from "@prisma/client";
-import { PatientIdParamSchema, SearchPatientsQuerySchema, UpdatePatientSchema } from "./patients.dto.js";
+import {
+  PatientIdParamSchema,
+  SearchPatientsQuerySchema,
+  UpdatePatientSchema,
+} from "./patients.dto.js";
 import * as patientsService from "./patients.service.js";
 
 /**
@@ -8,7 +12,7 @@ import * as patientsService from "./patients.service.js";
  * il ne doit jamais transiter dans une réponse HTTP.
  */
 const toPatientResponse = (patient: users) => {
-  const { password_hash, ...safePatient } = patient;
+  const { password_hash: _password_hash, ...safePatient } = patient;
   return safePatient;
 };
 

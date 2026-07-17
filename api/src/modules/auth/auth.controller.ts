@@ -1,7 +1,7 @@
 import { Context } from "hono";
 import { LoginSchema, RegisterSchema } from "./auth.dto.js";
 import * as authService from "./auth.service.js";
-import { decode, sign, verify } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 import { setCookie, getCookie } from "hono/cookie";
 import argon2 from "argon2";
 import { randomUUID } from "crypto";
@@ -61,10 +61,7 @@ export const login = async (c: Context) => {
     const invalidMsg = "Invalid email or password";
     if (!user) return c.json({ error: invalidMsg }, 401);
 
-    const passwordVerify = await argon2.verify(
-      user.password_hash,
-      parsed.data.password,
-    );
+    const passwordVerify = await argon2.verify(user.password_hash, parsed.data.password);
     if (!passwordVerify) return c.json({ error: invalidMsg }, 401);
 
     const { token, refreshToken } = await createJWT(user);
@@ -99,11 +96,7 @@ export const refreshToken = async (c: Context) => {
     const storedToken = await authService.findRefreshToken(tokenInCookie);
 
     // Vérification stricte
-    if (
-      !storedToken ||
-      storedToken.revoked ||
-      storedToken.user_id !== payload.userId
-    ) {
+    if (!storedToken || storedToken.revoked || storedToken.user_id !== payload.userId) {
       return c.json({ error: "Token invalid or revoked" }, 403);
     }
 
@@ -131,7 +124,7 @@ export const refreshToken = async (c: Context) => {
     });
 
     return c.json({ token });
-  } catch (error) {
+  } catch {
     return c.json({ error: "Invalid session" }, 401);
   }
 };
@@ -143,9 +136,9 @@ export const register = async (c: Context) => {
     return c.json({ error: parsed.error.format() }, 400);
   }
   try {
-    const user = await authService.registerService(parsed.data);
+    await authService.registerService(parsed.data);
     return c.json({ success: "User created" }, 201);
-  } catch (error) {
+  } catch {
     return c.json({ error: "User registration Failed" }, 401);
   }
 };
