@@ -62,8 +62,6 @@ CREATE INDEX idx_users_search ON users(lastname, email);
 
 CREATE INDEX idx_appointments_conflict_check ON appointments(doctor_id, start_at,end_at);
 
-ALTER TABLE doctor_schedules ADD CONSTRAINT doctor_schedules_doctor_id_day_of_week_key UNIQUE (doctor_id, day_of_week);
-
 INSERT INTO users (id, firstname, lastname, email, phone, date_of_birth, role, password_hash) VALUES
 ('550e8400-e29b-41d4-a716-446655440000', 'Jean', 'Dupont', 'jean.dupont@example.com', '0601020304', '1985-05-15', 'medecin', 'hash_medecin'),
 ('660e8400-e29b-41d4-a716-446655440001', 'Marie', 'Curie', 'marie.curie@example.com', '0605060708', '1990-10-20', 'patient', 'hash_patient');
