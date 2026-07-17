@@ -24,7 +24,6 @@ beforeAll(async () => {
   const secret = process.env.JWT_SECRET || "supersecretjwtkey";
 
   // 1. Nettoyer les plannings et utilisateurs de test précédents
-  await prisma.doctor_schedules.deleteMany({});
   await prisma.users.deleteMany({
     where: {
       email: { in: [doctorEmail, patientEmail] },
