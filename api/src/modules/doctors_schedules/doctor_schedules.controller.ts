@@ -52,14 +52,6 @@ export const updateSchedule = async (c: Context) => {
     if (!parsed.success) {
       return c.json({ error: parsed.error.format() }, 400);
     }
-    const isUpdate = canUpdateDoctor(
-      c.get("user")?.role,
-      parsed.data.doctor_id,
-      c.get("user")?.userId,
-    );
-    if (!isUpdate) {
-      return c.json({ error: "Unauthorized to update this schedule" }, 403);
-    }
 
     const schedule = await scheduleService.createSchedule(parsed.data);
     return c.json({ schedule }, 200);
