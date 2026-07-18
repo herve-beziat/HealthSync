@@ -98,6 +98,9 @@ prisma-push: # Applique les migrations Prisma à la base de données et génère
 test-all: # Lance l'intégralité de la suite de tests
 	@cd api && npm run test
 
+test-cucumber: # Lance les tests Cucumber
+	@cd api && npm run test:cucumber
+
 test: # Lance un fichier de test spécifique ou général (ex: make test s=auth)
 	@cd api && npm run test $(s)
 
