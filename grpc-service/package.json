@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "dotenv -e ../docker/.env.test -- vitest",
-    "test:coverage": "dotenv -e ../docker/.env.test -- vitest run --coverage"
+    "test:coverage": "dotenv -e ../docker/.env.test -- vitest run --coverage",
+    "proto:generate": "proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=src/generated proto/*.proto && proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=../api/src/generated proto/*.proto"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.4",
