@@ -22,7 +22,7 @@ export const UpdatePatientSchema = z
     lastname: z.string(),
     phone: z.string(),
     date_of_birth: z.coerce.date({
-      error: () => ({ message: "Format de date invalide (attendu: YYYY-MM-DD)" })
+      error: () => ({ message: "Format de date invalide (attendu: YYYY-MM-DD)" }),
     }),
   })
   .partial()

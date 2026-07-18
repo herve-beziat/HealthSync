@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.2-alpine
+        env:
+          POSTGRES_DB: healthsync_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d healthsync_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install grpc-service dependencies
+        run: npm ci
+        working-directory: grpc-service
+
+      - name: Create test env file
+        run: |
+          cat <<EOF > ../docker/.env.test
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5434/healthsync_test?schema=public
+          JWT_SECRET=ci-only-test-secret-not-for-production
+          EOF
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Load database schema
+        run: PGPASSWORD=postgres psql -h localhost -p 5434 -U postgres -d healthsync_test -f ../database/init.sql
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+  grpc-service:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.2-alpine
+        env:
+          POSTGRES_DB: healthsync_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d healthsync_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: grpc-service
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: grpc-service/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create test env file
+        run: |
+          cat <<EOF > ../docker/.env.test
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5434/healthsync_test?schema=public
+          EOF
+
+      - name: Load database schema
+        run: PGPASSWORD=postgres psql -h localhost -p 5434 -U postgres -d healthsync_test -f ../database/init.sql
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run tests with coverage
+        run: npm run test:coverage

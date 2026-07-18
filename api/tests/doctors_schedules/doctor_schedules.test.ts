@@ -9,7 +9,6 @@ app.onError((err, c) => {
   return c.text(`Test Server Error: ${err.message}\nStack: ${err.stack}`, 500);
 });
 
-let adminToken: string;
 let doctorToken: string;
 let patientToken: string;
 
@@ -25,7 +24,6 @@ beforeAll(async () => {
   const secret = process.env.JWT_SECRET || "supersecretjwtkey";
 
   // 1. Nettoyer les plannings et utilisateurs de test précédents
-  await prisma.doctor_schedules.deleteMany({});
   await prisma.users.deleteMany({
     where: {
       email: { in: [doctorEmail, patientEmail] },
@@ -74,22 +72,13 @@ beforeAll(async () => {
   // --- SÉCURITÉ : On valide immédiatement que les utilisateurs existent bien en BDD ---
   const checkDoctor = await prisma.users.findUnique({ where: { id: doctorId } });
   const checkPatient = await prisma.users.findUnique({ where: { id: patientId } });
-  
+
   if (!checkDoctor || !checkPatient) {
     throw new Error("Échec critique : Le médecin ou le patient n'a pas été créé en BDD.");
   }
 
   // 5. Générer les tokens JWT (Utilisation de USER_ROLE.MEDECIN ou "medecin")
   const exp = Math.floor(Date.now() / 1000) + 3600;
-
-  adminToken = await sign(
-    {
-      userId: "admin-id",
-      role: USER_ROLE?.ADMIN || "admin",
-      exp,
-    },
-    secret,
-  );
 
   doctorToken = await sign(
     {
@@ -215,14 +204,11 @@ describe("Doctor schedules", () => {
     });
 
     it("should return empty array for unknown doctor", async () => {
-      const res = await app.request(
-        "/doctor/00000000-0000-0000-0000-000000000001/schedules",
-        {
-          headers: {
-            Authorization: `Bearer ${patientToken}`,
-          },
+      const res = await app.request("/doctor/00000000-0000-0000-0000-000000000001/schedules", {
+        headers: {
+          Authorization: `Bearer ${patientToken}`,
         },
-      );
+      });
 
       expect(res.status).toBe(200);
 

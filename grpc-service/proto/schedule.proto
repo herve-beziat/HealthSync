@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package healthsync.schedules;
+
+service ScheduleService {
+  // Planning récurrent hebdomadaire d'un médecin
+  rpc GetDoctorSchedule(GetDoctorScheduleRequest) returns (GetDoctorScheduleResponse);
+}
+
+message GetDoctorScheduleRequest {
+  string doctor_id = 1;
+}
+
+message ScheduleEntry {
+  int32 id = 1;
+  int32 day_of_week = 2;            // 0 = dimanche ... 6 = samedi
+  string start_time = 3;            // format HH:MM:SS
+  string end_time = 4;              // format HH:MM:SS
+  int32 slot_duration_minutes = 5;
+}
+
+message GetDoctorScheduleResponse {
+  repeated ScheduleEntry schedules = 1;
+}
