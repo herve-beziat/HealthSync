@@ -76,9 +76,7 @@ describe("Appointments CRUD Endpoints", () => {
   let patientId1: string;
   let patientId2: string;
   let doctorId: string;
-  let adminId: string;
   let specialtyId: number;
-  let scheduleId: number;
   let appointmentId: string;
   let patientToken1: string;
   let patientToken2: string;
@@ -121,7 +119,6 @@ describe("Appointments CRUD Endpoints", () => {
     });
     patientId2 = patient2.id;
 
-
     const doctor = await prisma.users.create({
       data: {
         email: doctorData.email,
@@ -135,7 +132,7 @@ describe("Appointments CRUD Endpoints", () => {
     });
     doctorId = doctor.id;
 
-    const admin = await prisma.users.create({
+    await prisma.users.create({
       data: {
         email: adminData.email,
         firstname: adminData.firstname,
@@ -146,7 +143,6 @@ describe("Appointments CRUD Endpoints", () => {
         role: "admin",
       },
     });
-    adminId = admin.id;
 
     const specialty = await prisma.specialties.create({
       data: specialtyData,
@@ -160,7 +156,7 @@ describe("Appointments CRUD Endpoints", () => {
       },
     });
 
-    const schedule = await prisma.doctor_schedules.create({
+    await prisma.doctor_schedules.create({
       data: {
         doctor_id: doctorId,
         day_of_week: scheduleData.day_of_week,
@@ -169,7 +165,6 @@ describe("Appointments CRUD Endpoints", () => {
         slot_duration: scheduleData.slot_duration,
       },
     });
-    scheduleId = schedule.id;
 
     // Connexions
     const adminLogin = await app.request("/auth/login", {
@@ -280,7 +275,10 @@ describe("Appointments CRUD Endpoints", () => {
           status: "completed",
         }),
       });
-      console.log("PATCH /appointments response status:", res.body ? res.status : "No response body");
+      console.log(
+        "PATCH /appointments response status:",
+        res.body ? res.status : "No response body",
+      );
       expect(res.status).toBe(200);
     });
 
@@ -348,7 +346,7 @@ describe("Appointments CRUD Endpoints", () => {
       expect(Array.isArray(body)).toBe(true);
     });
 
-    // CORRECTION : Ton contrôleur intercepte la triche des patients en forçant leur propre ID (statut 200). 
+    // CORRECTION : Ton contrôleur intercepte la triche des patients en forçant leur propre ID (statut 200).
     // On vérifie donc que l'API renvoie bien un succès, mais qu'elle ne renvoie QUE l'historique du Patient 1 (et pas du Patient 2).
     it("should fallback to current patient history and not expose another patient's history", async () => {
       const res = await app.request(`/appointments/history?patient_id=${patientId2}`, {
@@ -357,7 +355,7 @@ describe("Appointments CRUD Endpoints", () => {
       });
       expect(res.status).toBe(200);
       const body = await res.json();
-      
+
       // On s'assure qu'aucun élément de la liste n'appartient au patientId2
       const hasForeignData = body.some((apt: any) => apt.patient_id === patientId2);
       expect(hasForeignData).toBe(false);

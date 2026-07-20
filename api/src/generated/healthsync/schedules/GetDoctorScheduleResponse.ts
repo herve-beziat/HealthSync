@@ -1,11 +1,14 @@
 // Original file: proto/schedule.proto
 
-import type { ScheduleEntry as _healthsync_schedules_ScheduleEntry, ScheduleEntry__Output as _healthsync_schedules_ScheduleEntry__Output } from '../../healthsync/schedules/ScheduleEntry';
+import type {
+  ScheduleEntry as _healthsync_schedules_ScheduleEntry,
+  ScheduleEntry__Output as _healthsync_schedules_ScheduleEntry__Output,
+} from "../../healthsync/schedules/ScheduleEntry";
 
 export interface GetDoctorScheduleResponse {
-  'schedules'?: (_healthsync_schedules_ScheduleEntry)[];
+  schedules?: _healthsync_schedules_ScheduleEntry[];
 }
 
 export interface GetDoctorScheduleResponse__Output {
-  'schedules': (_healthsync_schedules_ScheduleEntry__Output)[];
+  schedules: _healthsync_schedules_ScheduleEntry__Output[];
 }

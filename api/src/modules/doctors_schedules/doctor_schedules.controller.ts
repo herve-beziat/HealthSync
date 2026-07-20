@@ -85,7 +85,6 @@ export const getSlotsByDoctorId = async (c: Context) => {
   }
 
   try {
-
     const response = await new Promise((resolve, reject) => {
       grpcScheduleClient.getDoctorSchedule({ doctorId, date }, (err: any, res: any) => {
         if (err) return reject(err);
@@ -111,22 +110,21 @@ export const getAvailableSlots = async (c: Context) => {
 
   try {
     const gRPCResponse = await new Promise((resolve, reject) => {
-      grpcScheduleClient.getDoctorAvailableSlots(
-        { doctorId, date },
-        (err: any, response: any) => {
-          if (err) return reject(err);
-          resolve(response);
-        }
-      );
+      grpcScheduleClient.getDoctorAvailableSlots({ doctorId, date }, (err: any, response: any) => {
+        if (err) return reject(err);
+        resolve(response);
+      });
     });
 
     return c.json(gRPCResponse, 200);
-
   } catch (error: any) {
     console.error("gRPC Client Error:", error);
-    return c.json({ 
-      error: "Failed to fetch available slots from internal service",
-      details: error.details || error.message 
-    }, 500);
+    return c.json(
+      {
+        error: "Failed to fetch available slots from internal service",
+        details: error.details || error.message,
+      },
+      500,
+    );
   }
 };

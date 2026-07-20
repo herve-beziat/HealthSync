@@ -92,6 +92,7 @@ export const refreshToken = async (c: Context) => {
   if (!tokenInCookie) return c.json({ error: "Unauthorized" }, 401);
 
   try {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const payload = (await verify(tokenInCookie, JWT_SECRET, "HS256")) as any;
     const storedToken = await authService.findRefreshToken(tokenInCookie);
 

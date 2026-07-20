@@ -33,7 +33,7 @@ export const createAppointment = async (c: Context) => {
 
     const appointment = await appointmentsService.createAppointment(parsed.data);
     return c.json(appointment, 201);
-  } catch (error) {
+  } catch {
     return c.json({ message: "Error creating appointment" }, 500);
   }
 };
@@ -71,7 +71,7 @@ export const updateAppointment = async (c: Context) => {
 
     const updated = await appointmentsService.updateAppointment(id, parsed.data);
     return c.json(updated, 200);
-  } catch (error) {
+  } catch {
     return c.json({ message: "Error updating appointment" }, 500);
   }
 };
@@ -92,7 +92,7 @@ export const deleteAppointment = async (c: Context) => {
 
     await appointmentsService.deleteAppointment(id);
     return c.json({ message: "Appointment cancelled successfully" }, 200);
-  } catch (error) {
+  } catch {
     return c.json({ message: "Error cancelling appointment" }, 500);
   }
 };
@@ -108,7 +108,7 @@ export const getAppointmentsByPatient = async (c: Context) => {
   try {
     const appointments = await appointmentsService.getAppointmentsByPatient(patientId);
     return c.json(appointments, 200);
-  } catch (error) {
+  } catch {
     return c.json({ message: "Error fetching appointments" }, 500);
   }
 };
@@ -127,7 +127,7 @@ export const getAppointmentById = async (c: Context) => {
     }
 
     return c.json(appointment, 200);
-  } catch (error) {
+  } catch {
     return c.json({ message: "Error fetching appointment" }, 500);
   }
 };
@@ -140,7 +140,7 @@ export const getAppointmentsByDoctor = async (c: Context) => {
   try {
     const appointments = await appointmentsService.getAppointmentsByDoctor(doctorId, date);
     return c.json(appointments, 200);
-  } catch (error) {
+  } catch {
     return c.json({ message: "Error fetching doctor appointments" }, 500);
   }
 };
@@ -156,7 +156,7 @@ export const getHistory = async (c: Context) => {
   try {
     const history = await appointmentsService.getHistory(patientId);
     return c.json(history, 200);
-  } catch (error) {
+  } catch {
     return c.json({ message: "Error fetching history" }, 500);
   }
 };

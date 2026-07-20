@@ -3,7 +3,11 @@ import { AppointmentsInput, UpdateAppointmentInput } from "./appointments.dto.js
 import { prisma } from "../../utils/prisma.js";
 
 // 1. Validation de la durée
-export const validateSlotDuration = async (doctor_id: string, start: Date, end: Date): Promise<boolean> => {
+export const validateSlotDuration = async (
+  doctor_id: string,
+  start: Date,
+  end: Date,
+): Promise<boolean> => {
   const dayOfWeek = start.getUTCDay();
   const schedule = await prisma.doctor_schedules.findFirst({
     where: { doctor_id, day_of_week: dayOfWeek },
@@ -15,16 +19,19 @@ export const validateSlotDuration = async (doctor_id: string, start: Date, end: 
   return durationInMinutes <= schedule.slot_duration;
 };
 
-export const hasConflict = async (doctor_id: string, start: Date, end: Date, excludeAppointmentId?: string): Promise<boolean> => {
+export const hasConflict = async (
+  doctor_id: string,
+  start: Date,
+  end: Date,
+  excludeAppointmentId?: string,
+): Promise<boolean> => {
   const conflict = await prisma.appointments.findFirst({
     where: {
       doctor_id,
       status: "scheduled",
       id: excludeAppointmentId ? { not: excludeAppointmentId } : undefined,
-      OR: [
-        { start_at: { lt: end }, end_at: { gt: start } }
-      ]
-    }
+      OR: [{ start_at: { lt: end }, end_at: { gt: start } }],
+    },
   });
   return !!conflict;
 };
@@ -36,8 +43,8 @@ export const createAppointment = async (data: AppointmentsInput): Promise<appoin
       patient_id: data.patient_id,
       start_at: data.start_at,
       end_at: data.end_at,
-      status: "scheduled"
-    }
+      status: "scheduled",
+    },
   });
 };
 
@@ -49,7 +56,7 @@ export const getAppointmentById = async (id: string) => {
 export const getAppointmentsByPatient = async (patient_id: string) => {
   return prisma.appointments.findMany({
     where: { patient_id },
-    orderBy: { start_at: "asc" }
+    orderBy: { start_at: "asc" },
   });
 };
 
@@ -58,7 +65,7 @@ export const getAppointmentsByDoctor = async (doctor_id: string, dateStr?: strin
   if (!dateStr) {
     return prisma.appointments.findMany({
       where: { doctor_id, status: "scheduled" },
-      orderBy: { start_at: "asc" }
+      orderBy: { start_at: "asc" },
     });
   }
 
@@ -69,17 +76,20 @@ export const getAppointmentsByDoctor = async (doctor_id: string, dateStr?: strin
     where: {
       doctor_id,
       status: "scheduled",
-      start_at: { gte: startOfDay, lte: endOfDay }
+      start_at: { gte: startOfDay, lte: endOfDay },
     },
-    orderBy: { start_at: "asc" }
+    orderBy: { start_at: "asc" },
   });
 };
 
 // PATCH /appointments/:id
-export const updateAppointment = async (id: string, data: UpdateAppointmentInput): Promise<appointments> => {
+export const updateAppointment = async (
+  id: string,
+  data: UpdateAppointmentInput,
+): Promise<appointments> => {
   return prisma.appointments.update({
     where: { id },
-    data: data
+    data: data,
   });
 };
 
@@ -87,7 +97,7 @@ export const updateAppointment = async (id: string, data: UpdateAppointmentInput
 export const deleteAppointment = async (id: string): Promise<appointments> => {
   return prisma.appointments.update({
     where: { id },
-    data: { status: "cancelled" }
+    data: { status: "cancelled" },
   });
 };
 
@@ -95,6 +105,6 @@ export const deleteAppointment = async (id: string): Promise<appointments> => {
 export const getHistory = async (patient_id: string) => {
   return prisma.appointments.findMany({
     where: { patient_id },
-    orderBy: { start_at: "desc" }
+    orderBy: { start_at: "desc" },
   });
 };

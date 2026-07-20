@@ -5,14 +5,14 @@ s ?=
 
 
 init: env perms # Initialise l'environnement complet (copie .env, droits d'exécution)
-	@echo "🟢 Initialisation terminée."
+	@echo "Initialisation terminée."
 
 env: # Crée le fichier .env à partir de l'exemple s'il n'existe pas déjà
 	@if [ ! -f "./docker/.env" ]; then \
 		cp ./docker/.env.example ./docker/.env; \
-		echo "✅ Created .env from example"; \
+		echo "Created .env from example"; \
 	else \
-		echo "ℹ️ .env already exists"; \
+		echo ".env already exists"; \
 	fi
 
 perms: # Donne les droits d'exécution au script docker helper
@@ -60,7 +60,7 @@ restart-all: # Réinitialise TOUT : détruit les volumes (down -v) et relance pr
 
 remove-service: # Arrête un service, supprime son conteneur et SES VOLUMES associés (ex: make remove-service s=postgres-test)
 	@if [ -z "$(s)" ]; then \
-		echo "❌ Erreur: Spécifiez un service (ex: make remove-service s=postgres-test)"; \
+		echo "Erreur: Spécifiez un service (ex: make remove-service s=postgres-test)"; \
 	else \
 		./docker/docker.sh rm -f -s -v $(s); \
 	fi
@@ -83,6 +83,10 @@ clean: # Nettoie Docker en supprimant les images, conteneurs et réseaux inutili
 	docker volume prune -f
 
 # --- Base de données & Tests (dans le sous-dossier ./api) ---
+
+lint: # Lance le linter pour vérifier la qualité du code
+	@cd api && npm run lint
+	@cd grpc-service && npm run lint
 
 prisma-generate: # Génère le client Prisma localement
 	@cd api && npm run prisma:generate

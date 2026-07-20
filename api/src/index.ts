@@ -126,14 +126,15 @@ app.delete("/doctor-schedules/:id", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), a
 
 // Appointments
 app.get("/appointments/history", auth(), (c) => AppointmentController.getHistory(c));
-app.get("/appointments/doctor/:doctorId", auth(), (c) => AppointmentController.getAppointmentsByDoctor(c));
+app.get("/appointments/doctor/:doctorId", auth(), (c) =>
+  AppointmentController.getAppointmentsByDoctor(c),
+);
 
 app.post("/appointments", auth(), (c) => AppointmentController.createAppointment(c));
 app.patch("/appointments/:id", auth(), (c) => AppointmentController.updateAppointment(c));
 app.get("/appointments", auth(), (c) => AppointmentController.getAppointmentsByPatient(c));
 app.get("/appointments/:id", auth(), (c) => AppointmentController.getAppointmentById(c));
 app.delete("/appointments/:id", auth(), (c) => AppointmentController.deleteAppointment(c));
-
 
 export default app;
 

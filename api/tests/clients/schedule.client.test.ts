@@ -49,7 +49,8 @@ describe("Contract test — client REST vs ScheduleService (gRPC)", () => {
     GRPC_TEST_PORT = port.toString();
     process.env.GRPC_SERVER_HOST = `127.0.0.1:${GRPC_TEST_PORT}`;
 
-    DoctorScheduleController = await import("../../src/modules/doctors_schedules/doctor_schedules.controller.js");
+    DoctorScheduleController =
+      await import("../../src/modules/doctors_schedules/doctor_schedules.controller.js");
 
     await prisma.doctor_schedules.deleteMany({ where: { doctor_id: testDoctorId } });
     await prisma.users.deleteMany({ where: { email: testDoctorEmail } });
@@ -98,7 +99,7 @@ describe("Contract test — client REST vs ScheduleService (gRPC)", () => {
         () => reject(new Error("gRPC service did not start in time")),
         30000,
       );
-      
+
       grpcProcess.stdout.on("data", (data) => {
         const log = data.toString();
         console.log(`[gRPC Server Log]: ${log}`);
@@ -121,7 +122,7 @@ describe("Contract test — client REST vs ScheduleService (gRPC)", () => {
   it("should retrieve available slots via route 'getSlotsByDoctorId'", async () => {
     const res = await testApp.request(`/doctor/${testDoctorId}/available-slots?date=${testDate}`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${doctorToken}` }
+      headers: { Authorization: `Bearer ${doctorToken}` },
     });
 
     expect(res.status).toBe(200);
@@ -134,7 +135,7 @@ describe("Contract test — client REST vs ScheduleService (gRPC)", () => {
   it("should retrieve available slots via route 'getAvailableSlots'", async () => {
     const res = await testApp.request(`/doctor/${testDoctorId}/available-slots?date=${testDate}`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${doctorToken}` }
+      headers: { Authorization: `Bearer ${doctorToken}` },
     });
 
     expect(res.status).toBe(200);
@@ -147,9 +148,9 @@ describe("Contract test — client REST vs ScheduleService (gRPC)", () => {
   it("should return 400 if date query parameter is missing on getSlotsByDoctorId", async () => {
     const res = await testApp.request(`/doctors/slots/${testDoctorId}`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${doctorToken}` }
+      headers: { Authorization: `Bearer ${doctorToken}` },
     });
-    
+
     expect(res.status).toBe(400);
   });
 });
