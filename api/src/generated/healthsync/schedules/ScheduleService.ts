@@ -5,19 +5,19 @@ import type { MethodDefinition } from "@grpc/proto-loader";
 import type {
   GetDoctorAvailableSlotsRequest as _healthsync_schedules_GetDoctorAvailableSlotsRequest,
   GetDoctorAvailableSlotsRequest__Output as _healthsync_schedules_GetDoctorAvailableSlotsRequest__Output,
-} from "../../healthsync/schedules/GetDoctorAvailableSlotsRequest";
+} from "../../healthsync/schedules/GetDoctorAvailableSlotsRequest.js";
 import type {
   GetDoctorAvailableSlotsResponse as _healthsync_schedules_GetDoctorAvailableSlotsResponse,
   GetDoctorAvailableSlotsResponse__Output as _healthsync_schedules_GetDoctorAvailableSlotsResponse__Output,
-} from "../../healthsync/schedules/GetDoctorAvailableSlotsResponse";
+} from "../../healthsync/schedules/GetDoctorAvailableSlotsResponse.js";
 import type {
   GetDoctorScheduleRequest as _healthsync_schedules_GetDoctorScheduleRequest,
   GetDoctorScheduleRequest__Output as _healthsync_schedules_GetDoctorScheduleRequest__Output,
-} from "../../healthsync/schedules/GetDoctorScheduleRequest";
+} from "../../healthsync/schedules/GetDoctorScheduleRequest.js";
 import type {
   GetDoctorScheduleResponse as _healthsync_schedules_GetDoctorScheduleResponse,
   GetDoctorScheduleResponse__Output as _healthsync_schedules_GetDoctorScheduleResponse__Output,
-} from "../../healthsync/schedules/GetDoctorScheduleResponse";
+} from "../../healthsync/schedules/GetDoctorScheduleResponse.js";
 
 export interface ScheduleServiceClient extends grpc.Client {
   GetDoctorAvailableSlots(

@@ -3,7 +3,7 @@
 import type {
   ScheduleEntry as _healthsync_schedules_ScheduleEntry,
   ScheduleEntry__Output as _healthsync_schedules_ScheduleEntry__Output,
-} from "../../healthsync/schedules/ScheduleEntry";
+} from "../../healthsync/schedules/ScheduleEntry.js";
 
 export interface GetDoctorScheduleResponse {
   schedules?: _healthsync_schedules_ScheduleEntry[];

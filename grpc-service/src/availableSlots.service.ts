@@ -5,7 +5,7 @@ export const getAvailableSlots = async (doctor_id: string, date: string) => {
 
   const schedule = await pool.query(
     `SELECT start_time, end_time, slot_duration FROM doctor_schedules WHERE doctor_id = $1 AND day_of_week = $2`,
-    [doctor_id, day]
+    [doctor_id, day],
   );
 
   if (schedule.rows.length === 0) return [];
@@ -34,7 +34,7 @@ export const getAvailableSlots = async (doctor_id: string, date: string) => {
     doctor_id,
     durationInterval,
     startTimeISO,
-    endTimeISO
+    endTimeISO,
   ]);
 
   return reservedSlots.rows;
