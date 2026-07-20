@@ -128,9 +128,8 @@ app.delete("/doctor-schedules/:id", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), a
 app.get("/appointments/history", auth(), (c) => AppointmentController.getHistory(c));
 app.get("/appointments/doctor/:doctorId", auth(), (c) => AppointmentController.getAppointmentsByDoctor(c));
 
-// 2. Les routes globales et paramétrées ensuite
 app.post("/appointments", auth(), (c) => AppointmentController.createAppointment(c));
-app.patch("/appointments", auth(), (c) => AppointmentController.updateAppointment(c));
+app.patch("/appointments/:id", auth(), (c) => AppointmentController.updateAppointment(c));
 app.get("/appointments", auth(), (c) => AppointmentController.getAppointmentsByPatient(c));
 app.get("/appointments/:id", auth(), (c) => AppointmentController.getAppointmentById(c));
 app.delete("/appointments/:id", auth(), (c) => AppointmentController.deleteAppointment(c));

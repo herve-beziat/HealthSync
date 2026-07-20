@@ -273,11 +273,10 @@ describe("Appointments CRUD Endpoints", () => {
 
   describe("PATCH /appointments", () => {
     it("should allow a doctor to modify the status of an appointment (e.g., completed)", async () => {
-      const res = await app.request("/appointments", {
+      const res = await app.request(`/appointments/${appointmentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${doctorToken}` },
         body: JSON.stringify({
-          id: appointmentId,
           status: "completed",
         }),
       });
@@ -286,11 +285,10 @@ describe("Appointments CRUD Endpoints", () => {
     });
 
     it("should allow an admin to modify the status and schedule of an appointment", async () => {
-      const res = await app.request("/appointments", {
+      const res = await app.request(`/appointments/${appointmentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
         body: JSON.stringify({
-          id: appointmentId,
           status: "scheduled",
           start_at: confilctAppointment.start_at,
           end_at: confilctAppointment.end_at,
@@ -300,11 +298,10 @@ describe("Appointments CRUD Endpoints", () => {
     });
 
     it("should forbid a patient from modifying another patient's appointment status or schedule", async () => {
-      const res = await app.request("/appointments", {
+      const res = await app.request(`/appointments/${appointmentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${patientToken2}` },
         body: JSON.stringify({
-          id: appointmentId,
           status: "cancelled",
         }),
       });

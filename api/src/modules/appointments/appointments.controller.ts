@@ -38,14 +38,13 @@ export const createAppointment = async (c: Context) => {
   }
 };
 
-// PATCH /appointments (reçoit l'ID de l'appointment dans le body)
+// PATCH /appointments/:id
 export const updateAppointment = async (c: Context) => {
   const req = await c.req.json();
-  const { id, ...updateData } = req; // On extrait l'id requis pour ta route PATCH globale
+  const id = c.req.param("id");
+  if (!id) return c.json({ error: "Missing appointment id in path" }, 400);
 
-  if (!id) return c.json({ error: "Missing appointment id in body" }, 400);
-
-  const parsed = UpdateAppointmentSchema.safeParse(updateData);
+  const parsed = UpdateAppointmentSchema.safeParse(req);
   const currentUser = c.get("user");
 
   if (!parsed.success) return c.json({ error: parsed.error.format() }, 400);

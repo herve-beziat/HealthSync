@@ -15,7 +15,6 @@ export const validateSlotDuration = async (doctor_id: string, start: Date, end: 
   return durationInMinutes <= schedule.slot_duration;
 };
 
-// 2. Détection des conflits
 export const hasConflict = async (doctor_id: string, start: Date, end: Date, excludeAppointmentId?: string): Promise<boolean> => {
   const conflict = await prisma.appointments.findFirst({
     where: {
@@ -76,7 +75,7 @@ export const getAppointmentsByDoctor = async (doctor_id: string, dateStr?: strin
   });
 };
 
-// PATCH /appointments (prend un ID dans le body)
+// PATCH /appointments/:id
 export const updateAppointment = async (id: string, data: UpdateAppointmentInput): Promise<appointments> => {
   return prisma.appointments.update({
     where: { id },
@@ -84,6 +83,7 @@ export const updateAppointment = async (id: string, data: UpdateAppointmentInput
   });
 };
 
+// DELETE /appointments/:id
 export const deleteAppointment = async (id: string): Promise<appointments> => {
   return prisma.appointments.update({
     where: { id },
