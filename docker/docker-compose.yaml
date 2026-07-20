@@ -56,6 +56,7 @@ services:
     volumes:
       - ../api:/usr/src/app
       - api_node_modules:/usr/src/app/node_modules
+      - ../grpc-service/proto:/usr/src/app/proto
     networks:
       - healthsync
 

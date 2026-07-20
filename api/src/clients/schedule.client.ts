@@ -2,55 +2,34 @@ import path from "path";
 import { fileURLToPath } from "url";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
+import fs from "fs"; // Import requis pour vérifier l'existence du fichier
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROTO_PATH = path.resolve(__dirname, "../../../grpc-service/proto/schedule.proto");
+
+const dockerProtoPath = path.resolve(__dirname, "../../proto/schedule.proto");
+const localProtoPath = path.resolve(__dirname, "../../../grpc-service/proto/schedule.proto");
+
+let PROTO_PATH = process.env.PROTO_PATH ? path.resolve(process.env.PROTO_PATH) : dockerProtoPath;
+
+if (!process.env.PROTO_PATH && !fs.existsSync(PROTO_PATH)) {
+  PROTO_PATH = localProtoPath;
+}
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: true,
+  keepCase: false,
   longs: String,
   enums: String,
   defaults: true,
   oneofs: true,
 });
 
-// Chargement dynamique du .proto : typage exact du package non connu à la
-// compilation, d'où le `any` ici (limité à ce point d'entrée précis).
-const scheduleProto = grpc.loadPackageDefinition(packageDefinition) as any;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any;
+const ScheduleServiceClient = protoDescriptor.healthsync.schedules.ScheduleService;
 
-export interface ScheduleEntry {
-  id: number;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  slot_duration_minutes: number;
-}
+const GRPC_HOST = process.env.GRPC_SERVER_HOST || "grpc-service:50051";
 
-/**
- * Client gRPC vers le service Schedules (grpc-service).
- * Récupère le planning récurrent d'un médecin.
- * Destiné à être utilisé par le futur module Rendez-vous pour vérifier
- * la disponibilité d'un médecin avant de confirmer une réservation.
- */
-export const getDoctorSchedule = (
-  doctorId: string,
-  address: string = process.env.GRPC_SCHEDULE_SERVICE_URL || "localhost:50051",
-): Promise<ScheduleEntry[]> => {
-  return new Promise((resolve, reject) => {
-    const client = new scheduleProto.healthsync.schedules.ScheduleService(
-      address,
-      grpc.credentials.createInsecure(),
-    );
-
-    client.GetDoctorSchedule(
-      { doctor_id: doctorId },
-      (error: grpc.ServiceError | null, response: { schedules: ScheduleEntry[] }) => {
-        client.close();
-        if (error) {
-          return reject(error);
-        }
-        resolve(response.schedules);
-      },
-    );
-  });
-};
+export const grpcScheduleClient = new ScheduleServiceClient(
+  GRPC_HOST,
+  grpc.credentials.createInsecure(),
+);

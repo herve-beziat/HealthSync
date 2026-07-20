@@ -5,6 +5,7 @@ import * as DoctorController from "./modules/doctors/doctors.controller.js";
 import * as PatientsController from "./modules/patients/patients.controller.js";
 import * as SpecialtyController from "./modules/specialties/specialties.controller.js";
 import * as DoctorScheduleController from "./modules/doctors_schedules/doctor_schedules.controller.js";
+import * as AppointmentController from "./modules/appointments/appointments.controller.js";
 import { logger } from "hono/logger";
 import { USER_ROLE } from "./utils/user.js";
 import { auth } from "./middleware/auth.middleware.js";
@@ -77,6 +78,14 @@ app.delete("/doctor/:id", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), async (c) =
   return DoctorController.deleteDoctor(c);
 });
 
+app.get("/doctor/:doctorId/available-slots", auth(), async (c) => {
+  return DoctorScheduleController.getAvailableSlots(c);
+});
+
+app.get("/doctors/slots/:doctorId", auth(), async (c) => {
+  return DoctorScheduleController.getSlotsByDoctorId(c);
+});
+
 // Specialties
 app.get("/specialties", auth(), async (c) => {
   return SpecialtyController.getSpecialties(c);
@@ -114,6 +123,18 @@ app.put("/doctor-schedules/:id", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), asyn
 app.delete("/doctor-schedules/:id", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), async (c) => {
   return DoctorScheduleController.deleteSchedule(c);
 });
+
+// Appointments
+app.get("/appointments/history", auth(), (c) => AppointmentController.getHistory(c));
+app.get("/appointments/doctor/:doctorId", auth(), (c) =>
+  AppointmentController.getAppointmentsByDoctor(c),
+);
+
+app.post("/appointments", auth(), (c) => AppointmentController.createAppointment(c));
+app.patch("/appointments/:id", auth(), (c) => AppointmentController.updateAppointment(c));
+app.get("/appointments", auth(), (c) => AppointmentController.getAppointmentsByPatient(c));
+app.get("/appointments/:id", auth(), (c) => AppointmentController.getAppointmentById(c));
+app.delete("/appointments/:id", auth(), (c) => AppointmentController.deleteAppointment(c));
 
 export default app;
 
