@@ -9,13 +9,22 @@ import * as AppointmentController from "./modules/appointments/appointments.cont
 import { logger } from "hono/logger";
 import { USER_ROLE } from "./utils/user.js";
 import { auth } from "./middleware/auth.middleware.js";
+import { swaggerUI } from "@hono/swagger-ui";
+import path from "path";
+import { fileURLToPath } from "url";
+import { readFileSync } from "fs";
 
 const app = new Hono();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const swaggerYaml = readFileSync(path.resolve(__dirname, "../swagger.yaml"), "utf-8");
 app.use(logger());
 app.get("/", (c) => c.text("OK"));
 
-// Auth
+// Documentation API (Swagger/OpenAPI) — publique, pas d'authentification requise.
+app.get("/swagger.yaml", (c) => c.text(swaggerYaml, 200, { "Content-Type": "application/yaml" }));
+app.get("/docs", swaggerUI({ url: "/swagger.yaml" }));
 
+// Auth
 app.post("/auth/register", async (c) => {
   return AuthController.register(c);
 });
