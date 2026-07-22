@@ -13,19 +13,22 @@ Given("j'ai les informations d'un nouveau patient", async () => {
     password: "passwordSecure123!",
     phone: "0491101045",
     date_of_birth: "1990-01-01",
-    role: "patient"
+    role: "patient",
   };
 });
 
-When("j'envoie une requête POST vers l'endpoint {string} avec ces informations", async (endpoint: string) => {
-  response = await app.request(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(patient),
-  });
-});
+When(
+  "j'envoie une requête POST vers l'endpoint {string} avec ces informations",
+  async (endpoint: string) => {
+    response = await app.request(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patient),
+    });
+  },
+);
 
 Then("la réponse doit retourner un code de statut {int} Created", async (statusCode: number) => {
   assert.strictEqual(response.status, statusCode);
