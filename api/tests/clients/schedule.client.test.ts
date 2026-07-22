@@ -88,6 +88,7 @@ describe("Contract test — client REST vs ScheduleService (gRPC)", () => {
         DATABASE_URL: process.env.DATABASE_URL,
         GRPC_PORT: GRPC_TEST_PORT,
       },
+      shell: true,
     });
 
     grpcProcess.stderr.on("data", (data) => {
