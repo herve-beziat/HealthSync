@@ -32,7 +32,6 @@ export const getDoctorById = async (doctorId: string, secure: boolean) => {
       email: true,
       phone: true,
       date_of_birth: !secure,
-      password_hash: !secure,
       created_at: true,
       doctor_specialties: true,
       doctor_schedules: true,
