@@ -2,7 +2,16 @@ import { Context } from "hono";
 import * as doctorService from "./doctors.service.js";
 import { DoctorSchema } from "./doctors.dto.js";
 import { canDeleteDoctor, canUpdateDoctor, USER_ROLE } from "../../utils/user.js";
-import { Prisma } from "@prisma/client";
+import { Prisma, users } from "@prisma/client";
+
+/**
+ * Retire le hash du mot de passe avant de renvoyer un médecin au client —
+ * il ne doit jamais transiter dans une réponse HTTP.
+ */
+const toDoctorResponse = (doctor: users) => {
+  const { password_hash: _password_hash, ...safeDoctor } = doctor;
+  return safeDoctor;
+};
 
 export const getDoctors = async (c: Context) => {
   try {
@@ -39,7 +48,7 @@ export const createDoctor = async (c: Context) => {
     }
 
     const doctor = await doctorService.createDoctor(parsed.data);
-    return c.json({ doctor: doctor }, 201);
+    return c.json({ doctor: toDoctorResponse(doctor) }, 201);
   } catch {
     return c.json({ error: "Creating doctor failed" }, 500);
   }
@@ -63,7 +72,7 @@ export const updateDoctor = async (c: Context) => {
     if (!doctor) {
       return c.json({ error: "Doctor not found" }, 404);
     }
-    return c.json({ doctor: doctor }, 200);
+    return c.json({ doctor: toDoctorResponse(doctor) }, 200);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
       return c.json({ error: "Doctor not found" }, 404);
