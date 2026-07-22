@@ -66,11 +66,19 @@ Docker a été choisi pour garantir la reproductibilité des environnements de d
 - Les communications internes gagnent en clarté et en efficacité grâce à un contrat explicite. [web:38]
 - Le stockage des mots de passe est renforcé par un algorithme moderne et conçu pour résister aux attaques par GPU. [web:31]
 - Les environnements sont plus homogènes grâce à Docker. [web:46]
+- Le contrat gRPC porte désormais une vraie responsabilité métier (calcul de disponibilité), pas seulement un accès à une donnée brute — renforce la pertinence de gRPC dans l'architecture.
 
 ### Négatives
 - gRPC ajoute de la complexité d’intégration et de supervision. [web:38]
 - PostgreSQL impose une discipline plus forte sur les migrations et la gestion transactionnelle. [web:43]
 - Docker et CI/CD demandent une mise en place initiale plus structurée. [web:46]
+- Le service gRPC doit désormais interroger à la fois `doctor_schedules` et `appointments`, augmentant son couplage à des données qui n'appartiennent pas à son domaine d'origine (planning).
+
+## Mise à jour (2026-07-22) — Extension du périmètre gRPC
+
+La décision initiale limitait `ScheduleService` à l'exposition du planning récurrent brut (`GetDoctorSchedule`), le calcul des créneaux disponibles devant être effectué par le futur module Rendez-vous à partir de ce planning et de ses propres données de rendez-vous.
+
+En pratique, cette responsabilité a été déplacée côté service gRPC : une nouvelle méthode `GetDoctorAvailableSlots` calcule directement les créneaux disponibles (croisement planning × rendez-vous déjà pris, via une requête SQL utilisant `generate_series`). Ce choix a été conservé car il enrichit la démonstration de communication inter-services (le module Rendez-vous consomme désormais un résultat métier calculé côté gRPC, et non plus seulement une donnée brute), sans remettre en cause le choix technologique initial de gRPC.
 
 ## Alternatives rejetées
 
