@@ -47,7 +47,7 @@ export const updateSchedule = async (c: Context) => {
       return c.json({ error: parsed.error.format() }, 400);
     }
 
-    const schedule = await scheduleService.createSchedule(parsed.data);
+    const schedule = await scheduleService.createSchedule({ ...parsed.data, id });
     return c.json({ schedule }, 200);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
