@@ -8,14 +8,15 @@ Ce projet est une API de gestion de rendez-vous médicaux conçue pour la perfor
 HealthSync/
 ├── api/                    # Service REST principal
 │   ├── src/
-│   └── tests/
+│   ├── tests/
+|   └── swagger.yaml
 ├── grpc-service/           # Service gRPC
 │   ├── proto/
 │   └── src/
 ├── docs/
 │   ├── rapport-owasp.pdf   # Rapport sécurité OWASP
 │   ├── architecture.png    # Schéma de composants
-│   ├── adr.md               # Architecture Decision Record
+│   ├── ADR_01.md               # Architecture Decision Record
 │   └── presentation.pdf    # Support de soutenance
 ├── CONTRIBUTING.md         # Definition of Done + Git workflow
 └── README.md
@@ -49,6 +50,12 @@ Le projet utilise un **Makefile** pour simplifier la gestion des conteneurs Dock
    ```bash
    make launch
    ```
+
+### Documentation API
+
+Une fois les services lancés (`make launch` ou `make start`), la documentation interactive de l'API REST est disponible sur :
+
+http://localhost:3000/docs
 
 ### Commandes utiles
 
