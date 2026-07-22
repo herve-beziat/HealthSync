@@ -70,11 +70,11 @@ Le système est divisé en deux composants principaux pour séparer les responsa
 1. API Gateway / Core (Hono.js) : Gère l'authentification, les utilisateurs, et l'orchestration des rendez-vous.
 2. Slot Service (gRPC) : Service haute-performance dédié au calcul de la disponibilité des médecins.
 
-```Mermaid
-graph TD
-    Client[Client Web/Mobile] -- REST/JSON --> Gateway[API Core - Hono.js]
-    Gateway -- Protobuf/HTTP2 --> SlotService[Slot Service - gRPC]
-    Gateway -- SQL --> DB[(PostgreSQL)]
-    SlotService -- SQL --> DB
-    Gateway -- Auth --> JWT[JWT / Argon2]
+```mermaid
+flowchart TD
+    Client[Client Web / Mobile] -->|REST / JSON| Gateway[API Core - Hono.js]
+    Gateway -->|Protobuf / HTTP2| SlotService[Slot Service - gRPC]
+    Gateway -->|SQL| DB[(PostgreSQL)]
+    SlotService -->|SQL| DB
+    Gateway -->|Auth| Auth[JWT / Argon2]
 ```
