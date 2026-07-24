@@ -135,7 +135,7 @@ app.delete("/doctor-schedules/:id", auth([USER_ROLE.ADMIN, USER_ROLE.DOCTOR]), a
 
 // Appointments
 app.get("/appointments/history", auth(), (c) => AppointmentController.getHistory(c));
-app.get("/appointments/doctor/:doctorId", auth(), (c) =>
+app.get("/appointments/doctor/:doctorId", auth([USER_ROLE.DOCTOR, USER_ROLE.ADMIN]), (c) =>
   AppointmentController.getAppointmentsByDoctor(c),
 );
 

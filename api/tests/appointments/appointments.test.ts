@@ -371,14 +371,22 @@ describe("Appointments CRUD Endpoints", () => {
   });
 
   describe("GET /appointments/doctor/:doctorId", () => {
-    it("should return appointments for a specific doctor and day", async () => {
+    it("should return appointments for a specific doctor and day (doctor/admin only)", async () => {
       const res = await app.request(`/appointments/doctor/${doctorId}?date=2023-12-25`, {
         method: "GET",
-        headers: { Authorization: `Bearer ${patientToken1}` },
+        headers: { Authorization: `Bearer ${doctorToken}` },
       });
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(Array.isArray(body)).toBe(true);
+    });
+
+    it("should forbid a patient from listing a doctor's appointments", async () => {
+      const res = await app.request(`/appointments/doctor/${doctorId}?date=2023-12-25`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${patientToken1}` },
+      });
+      expect(res.status).toBe(403);
     });
   });
 
