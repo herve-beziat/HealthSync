@@ -75,6 +75,9 @@ exec: # Ouvre un shell interactif dans un conteneur (ex: make exec s=api)
 		./docker/docker.sh exec -it $(s) sh || ./docker/docker.sh exec -it $(s) /bin/bash; \
 	fi
 
+install: # Commande pour installer les nouveaux paquets dans le conteneur
+	./docker/docker.sh exec $(s) npm install
+
 stats: # Affiche la consommation CPU/RAM des conteneurs en temps réel
 	docker stats
 
@@ -103,7 +106,10 @@ test-all: # Lance l'intégralité de la suite de tests
 	@cd api && npm run test
 
 test-cucumber: # Lance les tests Cucumber
-	@cd api && npm run test:cucumber
+	@cd api && npm run cucumber
+
+test-cucumber-file: # 2. Lance un test spécifique make test-cucumber-file file=e2e/features/mon-fichier.feature
+	@cd api && npm run cucumber -- $(file)
 
 test: # Lance un fichier de test spécifique ou général (ex: make test s=auth)
 	@cd api && npm run test $(s)

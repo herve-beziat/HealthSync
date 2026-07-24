@@ -1,7 +1,7 @@
 {
   "default": {
-    "formatOptions": {
-      "snippetInterface": "synchronous"
-    }
+    "paths": [],
+    "import": ["e2e/features/steps/**/*.step.ts"],
+    "format": ["progress"]
   }
 }
