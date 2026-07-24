@@ -10,6 +10,8 @@ import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { USER_ROLE } from "./utils/user.js";
 import { auth } from "./middleware/auth.middleware.js";
+import { rateLimit } from "./middleware/rateLimit.middleware.js";
+import { createMiddleware } from "hono/factory";
 import { swaggerUI } from "@hono/swagger-ui";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -42,11 +44,21 @@ app.get("/swagger.yaml", (c) => c.text(swaggerYaml, 200, { "Content-Type": "appl
 app.get("/docs", swaggerUI({ url: "/swagger.yaml" }));
 
 // Auth
-app.post("/auth/register", async (c) => {
+// Rate limiting (OWASP A04) : fenêtre glissante de 5 requêtes / 15 min par IP sur
+// les endpoints sensibles, pour limiter le brute force sur les mots de passe et la
+// création massive de comptes. Désactivé en environnement de test : la suite
+// d'intégration enchaîne de nombreux register/login depuis la même origine, et le
+// middleware est couvert par son propre fichier de test dédié.
+const authRateLimit =
+  process.env.NODE_ENV === "test"
+    ? createMiddleware(async (_c, next) => next())
+    : rateLimit({ limit: 5, windowMs: 15 * 60 * 1000 });
+
+app.post("/auth/register", authRateLimit, async (c) => {
   return AuthController.register(c);
 });
 
-app.post("/auth/login", async (c) => {
+app.post("/auth/login", authRateLimit, async (c) => {
   return AuthController.login(c);
 });
 
