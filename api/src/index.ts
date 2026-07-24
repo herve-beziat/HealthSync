@@ -7,6 +7,7 @@ import * as SpecialtyController from "./modules/specialties/specialties.controll
 import * as DoctorScheduleController from "./modules/doctors_schedules/doctor_schedules.controller.js";
 import * as AppointmentController from "./modules/appointments/appointments.controller.js";
 import { logger } from "hono/logger";
+import { secureHeaders } from "hono/secure-headers";
 import { USER_ROLE } from "./utils/user.js";
 import { auth } from "./middleware/auth.middleware.js";
 import { swaggerUI } from "@hono/swagger-ui";
@@ -18,6 +19,22 @@ const app = new Hono();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const swaggerYaml = readFileSync(path.resolve(__dirname, "../swagger.yaml"), "utf-8");
 app.use(logger());
+// Headers de sécurité HTTP (OWASP A05). X-Content-Type-Options, X-Frame-Options et
+// Strict-Transport-Security sont déjà activés par défaut par ce middleware.
+// La CSP autorise cdn.jsdelivr.net, utilisé par la Swagger UI (/docs) pour ses assets.
+app.use(
+  secureHeaders({
+    contentSecurityPolicy: {
+      defaultSrc: ["'self'"],
+      // 'unsafe-inline' nécessaire : la Swagger UI (@hono/swagger-ui) injecte son
+      // script d'initialisation en inline, pas de nonce/hash disponible côté lib.
+      // Accepté car /docs ne sert que de la documentation publique, aucune donnée sensible.
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
+      styleSrc: ["'self'", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https://cdn.jsdelivr.net"],
+    },
+  }),
+);
 app.get("/", (c) => c.text("OK"));
 
 // Documentation API (Swagger/OpenAPI) — publique, pas d'authentification requise.
