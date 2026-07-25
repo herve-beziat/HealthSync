@@ -1,7 +1,7 @@
 # Variables par défaut
 s ?= 
 
-.PHONY: env perms init build launch remove logs-all logs ps start stop restart rebuild clean exec stats prisma-generate test-all test help
+.PHONY: env perms init build launch remove logs-all logs ps start stop restart rebuild clean exec stats prisma-generate test-all test-e2e test test-watch test-coverage help
 
 
 init: env perms # Initialise l'environnement complet (copie .env, droits d'exécution)
@@ -99,20 +99,20 @@ prisma-push: # Applique les migrations Prisma à la base de données et génère
 	@cd api && npx prisma db push
 
 # --- Tests ---
-test-all: # Lance l'intégralité de la suite de tests
-	@cd api && npm run test
+test-all: # Lance l'intégralité des tests : unitaires, intégration et E2E
+	@cd api && npm run test:coverage && npm run test:e2e
 
-test-cucumber: # Lance les tests Cucumber
-	@cd api && npm run test:cucumber
+test-e2e: # Lance les tests end-to-end Cucumber (parcours de rendez-vous)
+	@cd api && npm run test:e2e
 
-test: # Lance un fichier de test spécifique ou général (ex: make test s=auth)
+test: # Lance les tests en une passe, ciblés ou non (ex: make test s=auth)
+	@cd api && npm run test -- run $(s)
+
+test-watch: # Lance les tests en mode surveillance, ciblés ou non (ex: make test-watch s=auth)
 	@cd api && npm run test $(s)
 
-test-watch: # Lance les tests en mode watch pour un fichier spécifique ou général (ex: make test-watch s=auth)
-	@cd api && npm run test-watch $(s)
-
 test-coverage: # Lance les tests avec couverture de code et génère un rapport
-	@cd api && npm run test-coverage
+	@cd api && npm run test:coverage
 	
 # --- Aide ---
 
