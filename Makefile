@@ -119,4 +119,4 @@ test-coverage: # Lance les tests avec couverture de code et génère un rapport
 help: # Affiche la liste et la description de toutes les commandes disponibles
 	@echo "Commandes disponibles :"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?# .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "\033[1;32m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?# .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "\033[1;32m%-20s\033[0m %s\n", $$1, $$2}'
