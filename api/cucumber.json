@@ -1,5 +1,7 @@
 {
   "default": {
+    "paths": ["e2e/features/**/*.feature"],
+    "import": ["e2e/features/**/*.ts"],
     "formatOptions": {
       "snippetInterface": "synchronous"
     }
